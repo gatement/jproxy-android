@@ -19,6 +19,6 @@ public class MainActivity extends AppCompatActivity {
 
     public void onButtonClick(View view){
         Toast.makeText(MainActivity.this, "Starting HTTP Proxy Server", Toast.LENGTH_LONG).show();
-        new ProxyMain(new MyProxySettings(), new MyProxyLog()).run();
+        new ProxyThread().start();
     }
 }
