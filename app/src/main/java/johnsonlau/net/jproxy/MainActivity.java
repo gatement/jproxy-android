@@ -5,6 +5,10 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
 
+import net.johnsonlau.jproxy.lib.ProxyMain;
+import johnsonlau.net.jproxy.conf.MyProxyLog;
+import johnsonlau.net.jproxy.conf.MyProxySettings;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -14,7 +18,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onButtonClick(View view){
-        Toast.makeText(MainActivity.this, view.getId()+"", Toast.LENGTH_LONG).show();
-        new ProxyThread().start();
+        Toast.makeText(MainActivity.this, "Starting HTTP Proxy Server", Toast.LENGTH_LONG).show();
+        new ProxyMain(new MyProxySettings(), new MyProxyLog()).run();
     }
 }
