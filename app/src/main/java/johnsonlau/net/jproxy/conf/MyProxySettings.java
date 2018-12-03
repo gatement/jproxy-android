@@ -21,7 +21,5 @@ public class MyProxySettings extends ProxySettings {
     }
 
     @Override
-    public String getSshPwd() {
-        return "KAwIc4SSJqbpUju9";
-    }
+    public String getSshPwd() { return "123456"; }
 }
