@@ -7,19 +7,25 @@ public class MyProxySettings extends ProxySettings {
 
     @Override
     public String getSshHost() {
-        return "47.91.141.191";
+        return "1.2.3.4";
     }
 
     @Override
     public int getSshPort() {
-        return 9812;
+        return 22;
     }
 
     @Override
     public String getSshUser() {
-        return "johnson";
+        return "root";
     }
 
     @Override
     public String getSshPwd() { return "123456"; }
+
+    @Override
+    public int getProxyPort() {
+        return 8119;
+    }
 }
+
