@@ -2,5 +2,4 @@
     <string name="app_name">jproxy-android</string>
     <string name="notification_title">jproxy</string>
     <string name="notification_message">jproxy is running</string>
-    <string name="ticker_text">ticker</string>
 </resources>
