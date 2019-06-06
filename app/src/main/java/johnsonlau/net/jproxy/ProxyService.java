@@ -52,6 +52,7 @@ public class ProxyService extends IntentService {
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(
                 NOTIFICATION_SERVICE);
+
         notificationManager.createNotificationChannel(new NotificationChannel(
                 NOTIFICATION_CHANNEL_ID, NOTIFICATION_CHANNEL_ID,
                 NotificationManager.IMPORTANCE_DEFAULT));
