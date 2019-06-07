@@ -24,6 +24,7 @@ public class ProxyService extends Service {
 
     private static final int ONGOING_NOTIFICATION_ID = 1;
     private static final String NOTIFICATION_CHANNEL_ID = "jproxy";
+
     private static final String ACTION_CONNECT = "connect";
     private static final String ACTION_DISCONNECT = "disconnect";
 
@@ -55,7 +56,7 @@ public class ProxyService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null && ACTION_CONNECT.equals(intent.getAction())) {
             connect(intent);
-            updateNotification("connected");
+            updateNotification(R.string.notification_message);
             return START_STICKY;
         } else {
             disconnect();
@@ -108,7 +109,8 @@ public class ProxyService extends Service {
         }
     }
 
-    private void updateNotification(String message) {
+    private void updateNotification(final int msgId) {
+        String message = getString(msgId);
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
 
         Intent notificationIntent = new Intent(this, MainActivity.class);
