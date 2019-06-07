@@ -7,102 +7,143 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import net.johnsonlau.jproxy.lib.conf.ProxySettings;
+import johnsonlau.net.jproxy.pojo.Prefs;
+import johnsonlau.net.jproxy.pojo.Profile;
 
 public class MainActivity extends AppCompatActivity {
 
-    EditText profileName;
-    EditText serverAddr;
-    EditText serverPort;
-    EditText username;
-    EditText password;
-    EditText proxyPort;
+    private EditText profileNameCtl;
+    private EditText serverAddrCtl;
+    private EditText serverPortCtl;
+    private EditText usernameCtl;
+    private EditText passwordCtl;
+    private EditText proxyPortCtl;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        profileName = findViewById(R.id.profileName);
-        serverAddr = findViewById(R.id.serverAddr);
-        serverPort = findViewById(R.id.serverPort);
-        username = findViewById(R.id.username);
-        password = findViewById(R.id.password);
-        proxyPort = findViewById(R.id.proxyPort);
+        // get controls
+        profileNameCtl = findViewById(R.id.profileName);
+        serverAddrCtl = findViewById(R.id.serverAddr);
+        serverPortCtl = findViewById(R.id.serverPort);
+        usernameCtl = findViewById(R.id.username);
+        passwordCtl = findViewById(R.id.password);
+        proxyPortCtl = findViewById(R.id.proxyPort);
 
-        SharedPreferences namePrefs = getSharedPreferences(Prefs.PROFILE_PREFS_NAME, MODE_PRIVATE);
-        String profileNameStr = namePrefs.getString(Prefs.PROFILE_PROFILE_NAME, "default");
-        profileName.setText(profileNameStr);
-
-        SharedPreferences prefs = getSharedPreferences(profileNameStr, MODE_PRIVATE);
-        serverAddr.setText(prefs.getString(Prefs.SERVER_ADRR, ""));
-        serverPort.setText(String.valueOf(prefs.getInt(Prefs.SERVER_PORT, 22)));
-        username.setText(prefs.getString(Prefs.USERNAME, "root"));
-        password.setText(prefs.getString(Prefs.PASSWORD, ""));
-        proxyPort.setText(String.valueOf(prefs.getInt(Prefs.PROXY_PORT, 8119)));
+        // load UI from profile
+        Profile profile = getProfileFromPreference();
+        loadUIFromProfile(profile);
     }
 
-    public void onStart(View view){
-        String serverAddrStr = serverAddr.getText().toString();
-        int serverPortNum = 22;
-        try {
-            serverPortNum = Integer.parseInt(serverPort.getText().toString());
-        } catch (NumberFormatException e) {
-        }
-        String usernameStr = username.getText().toString();
-        String passwordStr = password.getText().toString();
-        int proxyPortNum = 8119;
-        try {
-            proxyPortNum = Integer.parseInt(proxyPort.getText().toString());
-        } catch (NumberFormatException e) {
-        }
+    public void onStartProxy(View view){
+        Profile profile = getProfileFromUI();
+        saveProfile(profile);
+        ProxyService.start(this, profile);
 
         Toast.makeText(MainActivity.this, "Starting HTTP Proxy Server", Toast.LENGTH_LONG).show();
-        ProxyService.start(this, serverAddrStr, serverPortNum, usernameStr, passwordStr, proxyPortNum);
+    }
+
+    public void onStopProxy(View view){
+        ProxyService.stop(this);
+        Toast.makeText(MainActivity.this, "Stopping HTTP Proxy Server", Toast.LENGTH_LONG).show();
     }
 
     public void onLoadProfile(View view){
-        String profileNameStr = profileName.getText().toString();
-        SharedPreferences prefs = getSharedPreferences(profileNameStr, MODE_PRIVATE);
-
-        serverAddr.setText(prefs.getString(Prefs.SERVER_ADRR, ""));
-        serverPort.setText(String.valueOf(prefs.getInt(Prefs.SERVER_PORT, 22)));
-        username.setText(prefs.getString(Prefs.USERNAME, "root"));
-        password.setText(prefs.getString(Prefs.PASSWORD, ""));
-        proxyPort.setText(String.valueOf(prefs.getInt(Prefs.PROXY_PORT, 8119)));
+        String profileName = profileNameCtl.getText().toString();
+        loadUIFromProfileName(profileName);
 
         Toast.makeText(MainActivity.this, "Profile loaded", Toast.LENGTH_LONG).show();
     }
 
     public void onSaveProfile(View view) {
-        String profileNameStr = profileName.getText().toString();
-        String serverAddrStr = serverAddr.getText().toString();
-        int serverPortNum = 22;
-        try {
-            serverPortNum = Integer.parseInt(serverPort.getText().toString());
-        } catch (NumberFormatException e) {
-        }
-        String usernameStr = username.getText().toString();
-        String passwordStr = password.getText().toString();
-        int proxyPortNum = 8119;
-        try {
-            proxyPortNum = Integer.parseInt(proxyPort.getText().toString());
-        } catch (NumberFormatException e) {
-        }
-
-        SharedPreferences namePrefs = getSharedPreferences(Prefs.PROFILE_PREFS_NAME, MODE_PRIVATE);
-        namePrefs.edit().putString(Prefs.PROFILE_PROFILE_NAME, profileNameStr).commit();
-
-        SharedPreferences prefs = getSharedPreferences(profileNameStr, MODE_PRIVATE);
-        prefs.edit()
-                .putString(Prefs.SERVER_ADRR, serverAddrStr)
-                .putInt(Prefs.SERVER_PORT, serverPortNum)
-                .putString(Prefs.USERNAME, usernameStr)
-                .putString(Prefs.PASSWORD, passwordStr)
-                .putInt(Prefs.PROXY_PORT, proxyPortNum)
-                .commit();
+        Profile profile = getProfileFromUI();
+        saveProfile(profile);
 
         Toast.makeText(MainActivity.this, "Profile saved", Toast.LENGTH_LONG).show();
+    }
+
+    private void saveProfile(Profile profile) {
+        String profileName = profile.getProfileName();
+
+        // save profileName
+        SharedPreferences namePrefs = getSharedPreferences(Prefs.PROFILE_PREFS_NAME, MODE_PRIVATE);
+        namePrefs.edit().putString(Prefs.PROFILE_PROFILE_NAME, profileName).commit();
+
+        // save profile values
+        SharedPreferences prefs = getSharedPreferences(profileName, MODE_PRIVATE);
+        prefs.edit()
+                .putString(Prefs.SERVER_ADRR, profile.getServerAddr())
+                .putInt(Prefs.SERVER_PORT, profile.getServerPort())
+                .putString(Prefs.USERNAME, profile.getUsername())
+                .putString(Prefs.PASSWORD, profile.getPassword())
+                .putInt(Prefs.PROXY_PORT, profile.getProxyPort())
+                .commit();
+    }
+
+    private void loadUIFromProfileName(String profileName)  {
+        SharedPreferences prefs = getSharedPreferences(profileName, MODE_PRIVATE);
+
+        profileNameCtl.setText(profileName);
+        serverAddrCtl.setText(prefs.getString(Prefs.SERVER_ADRR, ""));
+        serverPortCtl.setText(String.valueOf(prefs.getInt(Prefs.SERVER_PORT, 22)));
+        usernameCtl.setText(prefs.getString(Prefs.USERNAME, "root"));
+        passwordCtl.setText(prefs.getString(Prefs.PASSWORD, ""));
+        proxyPortCtl.setText(String.valueOf(prefs.getInt(Prefs.PROXY_PORT, 8119)));
+    }
+
+    private void loadUIFromProfile(Profile profile)  {
+        profileNameCtl.setText(profile.getProfileName());
+        serverAddrCtl.setText(profile.getServerAddr());
+        serverPortCtl.setText(String.valueOf(profile.getServerPort()));
+        usernameCtl.setText(profile.getUsername());
+        passwordCtl.setText(profile.getPassword());
+        proxyPortCtl.setText(String.valueOf(profile.getProxyPort()));
+    }
+
+    private Profile getProfileFromPreference() {
+        Profile profile = new Profile();
+
+        // load profileName
+        SharedPreferences namePrefs = getSharedPreferences(Prefs.PROFILE_PREFS_NAME, MODE_PRIVATE);
+        String profileName = namePrefs.getString(Prefs.PROFILE_PROFILE_NAME, "default");
+        profile.setProfileName(profileName);
+
+        // load profile values
+        SharedPreferences prefs = getSharedPreferences(profileName, MODE_PRIVATE);
+        profile.setServerAddr(prefs.getString(Prefs.SERVER_ADRR, ""));
+        profile.setServerPort(prefs.getInt(Prefs.SERVER_PORT, 22));
+        profile.setUsername(prefs.getString(Prefs.USERNAME, "root"));
+        profile.setPassword(prefs.getString(Prefs.PASSWORD, ""));
+        profile.setProxyPort(prefs.getInt(Prefs.PROXY_PORT, 8119));
+
+        return profile;
+    }
+
+    private Profile getProfileFromUI() {
+        Profile profile =  new Profile();
+
+        profile.setProfileName(profileNameCtl.getText().toString().trim());
+        profile.setServerAddr(serverAddrCtl.getText().toString().trim());
+        profile.setUsername(usernameCtl.getText().toString().trim());
+        profile.setPassword(passwordCtl.getText().toString().trim());
+
+        int serverPortNum = 22;
+        try {
+            serverPortNum = Integer.parseInt(serverPortCtl.getText().toString().trim());
+        } catch (NumberFormatException e) {
+        }
+        profile.setServerPort(serverPortNum);
+
+        int proxyPortNum = 8119;
+        try {
+            proxyPortNum = Integer.parseInt(proxyPortCtl.getText().toString().trim());
+        } catch (NumberFormatException e) {
+        }
+        profile.setProxyPort(proxyPortNum);
+
+        return profile;
     }
 
 }

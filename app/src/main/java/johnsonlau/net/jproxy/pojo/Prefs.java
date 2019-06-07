@@ -1,4 +1,4 @@
-package johnsonlau.net.jproxy;
+package johnsonlau.net.jproxy.pojo;
 
 public interface Prefs {
     String PROFILE_PREFS_NAME = "profilePrefsName";
