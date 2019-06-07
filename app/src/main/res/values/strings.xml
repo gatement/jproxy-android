@@ -2,7 +2,4 @@
     <string name="app_name">jproxy-android</string>
     <string name="notification_title">jproxy</string>
     <string name="notification_message">jproxy is running</string>
-    <string name="connecting">jVPN is connecting...</string>
-    <string name="connected">jVPN is connected!</string>
-    <string name="disconnected">jVPN is disconnected!</string>
 </resources>
