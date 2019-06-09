@@ -39,9 +39,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void onStartProxy(View view){
         Profile profile = getProfileFromUI();
-        saveProfile(profile);
         ProxyService.start(this, profile);
-
         Toast.makeText(MainActivity.this, "Starting HTTP Proxy Server", Toast.LENGTH_LONG).show();
     }
 
@@ -53,14 +51,12 @@ public class MainActivity extends AppCompatActivity {
     public void onLoadProfile(View view){
         String profileName = profileNameCtl.getText().toString();
         loadUIFromProfileName(profileName);
-
         Toast.makeText(MainActivity.this, "Profile loaded", Toast.LENGTH_LONG).show();
     }
 
     public void onSaveProfile(View view) {
         Profile profile = getProfileFromUI();
         saveProfile(profile);
-
         Toast.makeText(MainActivity.this, "Profile saved", Toast.LENGTH_LONG).show();
     }
 
@@ -74,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
         // save profile values
         SharedPreferences prefs = getSharedPreferences(profileName, MODE_PRIVATE);
         prefs.edit()
-                .putString(Prefs.SERVER_ADRR, profile.getServerAddr())
+                .putString(Prefs.SERVER_ADDR, profile.getServerAddr())
                 .putInt(Prefs.SERVER_PORT, profile.getServerPort())
                 .putString(Prefs.USERNAME, profile.getUsername())
                 .putString(Prefs.PASSWORD, profile.getPassword())
@@ -83,14 +79,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadUIFromProfileName(String profileName)  {
-        SharedPreferences prefs = getSharedPreferences(profileName, MODE_PRIVATE);
-
-        profileNameCtl.setText(profileName);
-        serverAddrCtl.setText(prefs.getString(Prefs.SERVER_ADRR, ""));
-        serverPortCtl.setText(String.valueOf(prefs.getInt(Prefs.SERVER_PORT, 22)));
-        usernameCtl.setText(prefs.getString(Prefs.USERNAME, "root"));
-        passwordCtl.setText(prefs.getString(Prefs.PASSWORD, ""));
-        proxyPortCtl.setText(String.valueOf(prefs.getInt(Prefs.PROXY_PORT, 8119)));
+        Profile profile = getProfileFromPreference(profileName);
+        loadUIFromProfile(profile);
     }
 
     private void loadUIFromProfile(Profile profile)  {
@@ -103,16 +93,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private Profile getProfileFromPreference() {
-        Profile profile = new Profile();
-
         // load profileName
         SharedPreferences namePrefs = getSharedPreferences(Prefs.PROFILE_PREFS_NAME, MODE_PRIVATE);
         String profileName = namePrefs.getString(Prefs.PROFILE_PROFILE_NAME, "default");
+
+        return getProfileFromPreference(profileName);
+    }
+
+    private Profile getProfileFromPreference(String profileName) {
+        Profile profile = new Profile();
         profile.setProfileName(profileName);
 
         // load profile values
         SharedPreferences prefs = getSharedPreferences(profileName, MODE_PRIVATE);
-        profile.setServerAddr(prefs.getString(Prefs.SERVER_ADRR, ""));
+        profile.setServerAddr(prefs.getString(Prefs.SERVER_ADDR, ""));
         profile.setServerPort(prefs.getInt(Prefs.SERVER_PORT, 22));
         profile.setUsername(prefs.getString(Prefs.USERNAME, "root"));
         profile.setPassword(prefs.getString(Prefs.PASSWORD, ""));

@@ -1,6 +1,5 @@
 package johnsonlau.net.jproxy;
 
-import android.app.IntentService;
 import android.app.Notification;
 import android.app.Service;
 import android.content.Intent;
@@ -8,9 +7,7 @@ import android.content.Context;
 import android.app.PendingIntent;
 import android.app.NotificationManager;
 import android.app.NotificationChannel;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
 import android.widget.Toast;
 
 import net.johnsonlau.jproxy.lib.ProxyServer;
@@ -33,7 +30,7 @@ public class ProxyService extends Service {
     public static void start(Context context, Profile profile) {
         Intent intent = new Intent(context, ProxyService.class);
         intent.setAction(ACTION_CONNECT);
-        intent.putExtra(Prefs.SERVER_ADRR, profile.getServerAddr());
+        intent.putExtra(Prefs.SERVER_ADDR, profile.getServerAddr());
         intent.putExtra(Prefs.SERVER_PORT, profile.getServerPort());
         intent.putExtra(Prefs.USERNAME, profile.getUsername());
         intent.putExtra(Prefs.PASSWORD, profile.getPassword());
@@ -86,7 +83,7 @@ public class ProxyService extends Service {
     private void connect(Intent intent) {
         disconnect();
 
-        final String serverAddr = intent.getStringExtra(Prefs.SERVER_ADRR);
+        final String serverAddr = intent.getStringExtra(Prefs.SERVER_ADDR);
         final int serverPort = intent.getIntExtra(Prefs.SERVER_PORT, 22);
         final String username = intent.getStringExtra(Prefs.USERNAME);
         final String password = intent.getStringExtra(Prefs.PASSWORD);
